@@ -1,0 +1,247 @@
+{
+  "_comment": "Engagement policy for the bug-hunting skill. Every key is enforced by the workflow. Edit for your team; scripts read this file, never hardcode.",
+  "operator": {
+    "company_name": "",
+    "role": "authorized security tester",
+    "authorization_basis": "written engagement contract on file",
+    "default_contact": "",
+    "stance": "the client wants all-in testing: full depth, full coverage, no self-imposed limits beyond this policy"
+  },
+  "budget": {
+    "tokens": "unlimited",
+    "conserve_tokens": false,
+    "rounds_min": 8,
+    "rounds_max": null,
+    "stop_early": false,
+    "stop_conditions": [
+      "critical-proven-and-chained",
+      "surface-exhausted-documented"
+    ],
+    "intermediate_states_are_not_stops": true,
+    "time_budget_hours": null,
+    "parallel_subagents_encouraged": true,
+    "note_stop_semantics": "critical-proven-and-chained = critical impact proven AND its chain matrix exhausted (config.testing.chain_matrix_required); proving a critical never licenses skipping the escalation ladder on it"
+  },
+  "testing": {
+    "artifact_prefix": "SECTEST_",
+    "static_before_dynamic": true,
+    "require_dynamic_test_plan": true,
+    "plan_requires_negative_controls": true,
+    "plan_requires_artifact_registration": true,
+    "plan_requires_rollback": true,
+    "differential_controls_required": true,
+    "retest_verified_findings": 2,
+    "idor_min_records": 20,
+    "recency_window_days": 180,
+    "lateral_movement_mandatory": true,
+    "escalation_ladder_mandatory": true,
+    "target_severity": "critical",
+    "full_coverage_enforced": {
+      "all_endpoints_probed": true,
+      "all_keys_capability_matrixed": true,
+      "all_hosts_infra_scanned": true,
+      "all_autoverify_hosts_assetlinks_checked": true,
+      "all_exports_hashed": true,
+      "coverage_table_in_findings_required": true
+    },
+    "per_class_depth": {
+      "hardcoded_secrets": {
+        "capability_matrix": true,
+        "lateral_replay_all_services": true,
+        "cost_abuse_check": true,
+        "same_cloud_project_probe": true
+      },
+      "bola_idor": {
+        "range_probe_first": true,
+        "record_minimum": 20,
+        "recency_proof": true,
+        "write_path_hunt": true,
+        "scale_estimate_status_only": true
+      },
+      "auth_bypass": {
+        "negative_control_same_block": true,
+        "staging_to_prod_crossover": true,
+        "guest_token_admin_probe": true,
+        "token_expiry_and_scope_map": true
+      },
+      "otp_abuse": {
+        "send_arrival_proof_own_inbox": true,
+        "verify_lockout_probe_min_attempts": 10,
+        "feasibility_math_required": true,
+        "zero_third_party_dispatch": true
+      },
+      "broken_crypto": {
+        "offline_decrypt_real_payload": true,
+        "server_accepted_forgery": true,
+        "key_reuse_scan": true
+      },
+      "cloud_storage": {
+        "listing_proof": true,
+        "single_sample_only": true,
+        "object_dates_required": true,
+        "filter_match_zero_for_sensitive": true
+      },
+      "infra_exposure": {
+        "protocol_transcript": true,
+        "per_path_cve_verification": true,
+        "unverified_cve_is_surface_note_only": true,
+        "delivery_proof_own_account_only": true
+      },
+      "tenant_takeover": {
+        "controlled_chain_proof": true,
+        "role_change_response_required": true,
+        "cross_tenant_probe": true
+      },
+      "webview_deeplink": {
+        "on_device_execution_required": true,
+        "static_chain_is_hypothesis": true,
+        "assetlinks_http_proof_reportable": true
+      },
+      "api_key_abuse": {
+        "capability_matrix": true,
+        "sibling_api_probe": true,
+        "billable_impact_quantified": true
+      }
+    },
+    "anti_honeypot": {
+      "enforced": true,
+      "newest_record_timestamp_required": true,
+      "active_status_records_required": true,
+      "artifact_write_readback_preferred": true,
+      "current_app_build_check": true,
+      "stale_policy": "pivot-not-report"
+    },
+    "business_logic": {
+      "state_machine_enumeration": true,
+      "step_skip": true,
+      "step_repeat": true,
+      "negative_and_zero_values": true,
+      "race_conditions": true,
+      "race_min_concurrent": 20,
+      "race_max_concurrent": 100,
+      "mass_assignment_fields": [
+        "role",
+        "isAdmin",
+        "is_paid",
+        "approved",
+        "balance",
+        "amount",
+        "status"
+      ]
+    },
+    "authorization_battery": {
+      "two_owned_accounts_required": true,
+      "horizontal_idor": true,
+      "vertical_escalation": true,
+      "method_confusion": true,
+      "uuid_vs_integer_note": true
+    },
+    "chain_matrix_required": true,
+    "chain_matrix_cell_states": [
+      "TESTED",
+      "NOT-APPLICABLE",
+      "BLOCKED"
+    ],
+    "finding_into_finding_chaining": true,
+    "parameter_space_chaining": true,
+    "impact_quantification_required": true,
+    "parser_porting_from_client": true,
+    "cvss_from_measured_impact": true,
+    "deep_chain_checklist_required": true,
+    "deep_chain_gates": [
+      "parameter_semantics_3way",
+      "scale_proof",
+      "depth_proof_snapshot_vs_archive",
+      "data_class_inventory",
+      "foothold_export",
+      "environment_replication",
+      "write_sibling_check"
+    ],
+    "unchained_findings_not_reportable": true,
+    "mode_selection": {
+      "policy": "conditional_static_or_dynamic_first",
+      "default": "static-first when client artifact exists, dynamic-first otherwise",
+      "log_choice_in_round1": true,
+      "switch_triggers": [
+        "server-only differential question",
+        "bundle-revealed endpoint with unknown enforcement",
+        "traffic-revealed client artifact"
+      ],
+      "mixed_mode_normal": true,
+      "mode_transition_logged": true,
+      "proof_gate_unchanged": "whichever mode finds the lead, only raw captured evidence makes it a finding"
+    }
+  },
+  "http": {
+    "delay_ms": 200,
+    "max_parallel": 5,
+    "impersonate": "chrome124",
+    "timeout_s": 20,
+    "retries": 2,
+    "verify_tls": false,
+    "waf_bypass_ladder": [
+      "curl_cffi_impersonation",
+      "targeted_low_concurrency",
+      "rotate_vantage",
+      "skip_full_spider"
+    ]
+  },
+  "evidence": {
+    "mask_by_default": true,
+    "sampling_seed": 42,
+    "discard_bodies_on_scale_sweeps": true,
+    "raw_request_response_pairs_required": true,
+    "raw_transcripts_required": true,
+    "transcripts_tool_generated_only": true,
+    "hand_written_evidence_banned": true,
+    "binary_bodies_byte_exact": true,
+    "sha256_chain_required": true,
+    "analysis_notes_segregated": true,
+    "control_same_capture_run": true,
+    "hash_all_artifacts": true,
+    "cleanup_evidence_required": true,
+    "sensitive_full_records_only_on_request": true
+  },
+  "workspace": {
+    "root": "./",
+    "layout": "canonical",
+    "findings_append_only": true,
+    "provenance_required": true
+  },
+  "report": {
+    "banned_words": [
+      "potential",
+      "candidate",
+      "likely",
+      "possibly",
+      "theoretical",
+      "could"
+    ],
+    "cvss_via_tool_only": true,
+    "dual_framing_required": true,
+    "positive_controls_section_required": true,
+    "lateral_movement_map_required": true,
+    "reproduction_under_minutes": 2,
+    "escalation_ladder_documented_per_finding": true,
+    "open_items_and_blockers_documented": true
+  },
+  "tools": {
+    "doctor_before_engagement": true,
+    "scanner_output_is_lead_only": true,
+    "mcp_servers_expected": [
+      "cvss",
+      "tempmail",
+      "shodan",
+      "hacktricks",
+      "cve-mcp"
+    ],
+    "learnback_after_engagement": true,
+    "enforcement_tools": {
+      "evidence_capture": "bin/evidence_capture.py — ALL dynamic probes go through it (raw transcripts guaranteed)",
+      "differential": "bin/differential.py — deep-chain gate 1 (3-way parameter semantics) via evidence_capture",
+      "impact_parser": "bin/impact_parser.py — quantifies impact from captured bodies (record/PII/freshness/scale)",
+      "chain_gate": "bin/chain_gate.py — QA gate enforcer; must exit 0 before any report ships"
+    },
+    "report_ships_only_if": "bin/chain_gate.py <workspace> exits 0"
+  }
+}

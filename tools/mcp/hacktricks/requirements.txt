@@ -1,0 +1,6 @@
+mcp>=1.29
+fastmcp>=3.4
+fastembed>=0.8
+trafilatura>=2.2
+httpx>=0.28
+numpy>=2.0
