@@ -99,7 +99,7 @@ def main() -> int:
         mtext = man.read_text(errors="ignore")
         triage = [
             "=== manifest flags ===",
-            "\n".join(sorted(set(re.findall(r'android:(allowBackup|usesCleartextTraffic)="[a-z]+"', mtext)))) or "(defaults)",
+            "\n".join(sorted(set(re.findall(r'android:(?:allowBackup|usesCleartextTraffic)="[a-z]+"', mtext)))) or "(defaults)",
             "=== exported components ===",
             "\n".join(re.findall(r'android:name="([^"]+)"', "\n".join(l for l in mtext.splitlines() if 'android:exported="true"' in l))[:10]) or "(none)",
             "=== autoVerify hosts ===",

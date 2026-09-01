@@ -1,6 +1,6 @@
 # Mobile Hunting: APK Acquisition to Proof Pipeline (per stack)
 
-The proven loop across 12+ APK engagements: acquire with provenance, decode, extract, sweep, signature, dynamic instrumentation, minimal live proof, lateral movement. This file is the complete mobile methodology.
+The proven loop across 12+ APK engagements: acquire with provenance, decode, extract, sweep, signature, dynamic instrumentation, minimal live proof, lateral movement. Sections 1-10 are the Android pipeline. Section 11 is the iOS pipeline: methodology is standard and the proof bars carry over unchanged, but it is not yet case-hardened in our engagements — label iOS findings' confidence honestly and learn back hard after the first iOS case.
 
 ## 1. Acquisition WITH PROVENANCE EVIDENCE
 
@@ -16,6 +16,7 @@ Rules:
 - app/ is the untouched source of truth. Decode elsewhere.
 - XAPK is a zip: extract, use the non-config apk as base, keep splits (signatures and native libs differ per split).
 - Version diffing is a first-class technique: acquire two versions and diff string dumps and pools. Secrets get added between versions, and diffing surfaces exactly what changed.
+- Old-version acquisition when the mirror API returns empty (learned 2026-08, ESA engagement: the vendored apkpure CLI's get_app_his_version returned version_list:[] while full history existed): fetch the mirror WEBSITE — apkpure.net/<slug>/versions lists every old build; each /download/<version> page carries the direct CDN link with the versionCode embedded (d.apkpure.net/b/XAPK/<pkg>?versionCode=N), the published SHA-256/SHA-1 for provenance verification, and the release date. Verify the downloaded hash against the page value; same-signer check via androguard across versions.
 - Record the app-store metadata (version code) alongside the hash: builds are identified by versionCode, not versionName.
 
 ## 2. Decode (all stacks)
@@ -122,6 +123,7 @@ Backup analysis (allowBackup=true): adb backup > ABE unpack > grep for tokens an
 ## 9. Live proof: minimal, differential, lateral
 
 - One real request with the recovered credential against the most sensitive READ endpoint, saved as evidence JSON. Negative control (garbage token gets 401/403) in the same block.
+- TLS-fingerprint WAFs (learned 2026-09, ESA engagement): bin/evidence_capture.py uses the Python stdlib TLS stack, which Cloudflare hard-blocks. When probes 403 with a CF block page, do not conclude "gated" — first re-fire through a curl_cffi wrapper with the configured impersonation profile (chrome124 / chrome99_android / okhttp UA ladder; keep the identical transcript format, e.g. the workspace's recon/capture_cffi.py). If the block page says "Sorry, you have been blocked" (not a solvable challenge), it is a geo/IP hard block: record it as a vantage limit and a positive control, and hand the probe to a client-side/ID-vantage run. Distinguish: challenge page (solvable with a real browser) vs hard block (vantage-bound).
 - Lateral movement is mandatory: replay the credential against EVERY host in hosts.txt and EVERY endpoint in endpoints.txt. "One public client secret accepted by five microservices" was a real Critical report.
 - WAF or CDN blocking: curl_cffi impersonation with the configured profile.
 - NXDOMAIN vs geofence: resolve via public DNS before claiming unreachable. Several "geo-fenced" hosts turned out to be dead DNS.
@@ -139,3 +141,72 @@ recon/harness/ (frida scripts per target)
 poc/poc_<id>.py            self-verifying, --mask default, prints PASS/FAIL
 evidence/*.json            real request+response pairs, masked
 ```
+
+For iOS targets the equivalent outputs are: ipa/SHA256SUMS.txt + PROVENANCE.txt,
+extracted/{allstrings, hosts, endpoints, secret_sweep, entitlements, url_schemes}.txt,
+decoded/ headers and disassembly, traffic/, recon/harness/ (frida scripts).
+
+## 11. iOS pipeline (methodology, not yet case-hardened)
+
+Same loop as Android: acquire with provenance, decode, sweep, hook, prove. The tool names and
+the extraction surface differ.
+
+### Acquisition with provenance
+
+| Method | Tool | Evidence produced |
+|---|---|---|
+| Client-provided IPA | copy into ipa/, hash immediately | ipa/SHA256SUMS.txt + PROVENANCE.txt |
+| Device pull | frida + `frida-ps -Uai` lists installed apps; pull via SSH/rooted device or ideviceinstaller on a jailbroken device | ipa-dumps/{bundle-id}/ plus SHA256 |
+| TestFlight / App Store | only with client coordination; no apkpure-equivalent mirror with provenance exists | record the account and redemption as provenance |
+
+An IPA is a signed zip: `unzip`, work under Payload/*.app. Keep the original untouched, same
+as app/ on Android. No public mirror with provenance: version-diff acquisition needs the
+client's build history or an MDM archive.
+
+### Decode
+
+- Info.plist is the manifest equivalent: URL schemes (CFBundleURLTypes), universal link
+  entitlements, NSAppTransportSecurity exceptions (NSAllowsArbitraryLoads), LSSupportsOpening
+  DocumentsInPlace, background modes.
+- embedded.mobileprovision: entitlements and team id via `security cms -D -i
+  embedded.mobileprovision`. App Store builds strip it; enterprise/dev builds carry it.
+- Entitlements (codesign -d --entitlements) drive keychain-sharing and app-group surfaces.
+- ObjC headers: class-dump (or dsdump on stripped modern binaries). Swift: swift-demangle
+  over symbols; Hopper/IDA/Ghidra for the binary itself.
+- Frameworks/, PlugIns/ (extensions are separate attack surface: they run as their own
+  process with their own entitlements), assets/ and bundled .json/.plist configs.
+- strings over the main binary and every Frameworks/*.dylib. Same sweep regexes as Android
+  (section 5) plus iOS patterns: no AIza/AKIA difference, but add apns tokens, bundle-id
+  scoped secrets, Firebase GoogleService-Info.plist (its API key + project id feed the
+  class-10 Firebase probes unchanged).
+
+### iOS-specific surfaces
+
+| Surface | Check | Maps to |
+|---|---|---|
+| Universal links | https://<domain>/apple-app-site-association for every associated domain; broken/missing JSON is the assetlinks twin | playbook class 9 |
+| Keychain | runtime dump (frida keychain enumeration or keychain-dumper on jailbroken); items with kSecAttrAccessibleAlways and weak access groups | playbook class 1 |
+| Pasteboard | apps that copy sensitive fields on background/resign-active; UIPasteboard is system-wide | standalone finding |
+| URL schemes | scheme conflicts (two apps registering one scheme lets a malicious app hijack), unvalidated scheme params feeding WebViews | playbook class 9 |
+| App groups / extensions | shared containers with world-readable-by-family data; extension IPC without origin checks | lateral |
+| WKWebView bridges | WKScriptMessageHandler exposure, JS inject into untrusted pages, postMessage surfaces | playbook class 9 |
+| ATS exceptions | NSAllowsArbitraryLoads plus a cleartext endpoint is the usesCleartextTraffic twin | hygiene + MITM chain surface |
+
+### Dynamic instrumentation (Frida on iOS)
+
+- Same method as section 7: locate statically, Interceptor.attach, exercise, capture.
+  ObjC: `ObjC.classes.ClassName['- method:']` hooking; Swift needs mangled-symbol hooks.
+- SSL pinning: frida scripts for NSURLSession/AFNetworking/TrustKit; unpinning then Burp/
+  mitmproxy identical to section 6. Install the CA via a profile; apps pinning anyway get
+  the frida unpinning pass.
+- Anti-debug (ptrace PT_DENY_ATTACH, sysctl checks, fishhook-based detection): hook the
+  checks, not the syscalls.
+- Jailbroken device or corepatched emulator is required for full hooking; a stock device
+  limits you to network-level and static analysis (log that as the boundary honestly).
+
+### Proof
+
+Everything in sections 9-10 applies verbatim: differential probes, capability matrices,
+recency, lateral replay, prefixed artifacts. The signing cert SHA-1 has no X-Android-Cert
+equivalent on iOS (no Maps-style header restriction proof); universal-link proofs cite the
+AASA fetch instead.

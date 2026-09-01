@@ -8,7 +8,8 @@ Each tool is a self-contained folder. Every MCP server follows the same conventi
 
 | Tool | Path | What it does |
 |---|---|---|
-| APK mirror downloader | `tools/apkpure/` | Acquire target APKs with provenance (versioned + SHA256), bypasses CDN bot walls. Run: `python3 tools/apkpure/apkpure_dl/cli.py <package>` |
+| APK mirror downloader | `tools/apkpure/` | Acquire target APKs with provenance (versioned + SHA256), bypasses CDN bot walls via TLS impersonation. Run: `python3 tools/apkpure/apkpure_dl/cli.py <package>` |
+| Play Store metadata | `tools/play_store/` | `play_meta.py <pkg>` - live Play Store version/update date, no account, no mirror lag. The authoritative "newest Play version" check. `play_pull.py` downloads directly from Play but needs a burner Google account (see its README) |
 | Device APK puller | `tools/device_pull/` | ADB split-APK pull with SHA256, when you have a physical device |
 | CVSS MCP | `tools/mcp/cvss/` | cvss31 score/explain/batch, honest severity for reports |
 | Tempmail MCP | `tools/mcp/tempmail/` | 7-provider disposable email: account registration + OTP arrival proofs |

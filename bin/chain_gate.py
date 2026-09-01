@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
-"""chain_gate: enforce the QA gate mechanically on a workspace's FINDINGS.md + evidence/.
+"""chain_gate: enforce the QA gate mechanically on a workspace's FINDINGS.md + REPORT.md + evidence/.
 
-Reads the workspace state and reports, per VERIFIED finding:
+Per VERIFIED finding (FINDINGS.md):
   - raw evidence exists (evidence/raw/<finding-id>_* transcript, non-empty)
   - negative control present (a _control or control file for the finding)
   - retest captures present (config retest_verified_findings, default 2)
   - chain matrix row exists and has no empty cells
   - impact quantification block present (data findings)
   - CVSS vector present and cites measured numbers (impact block present alongside)
-  - SHA256SUMS.txt covers every evidence/raw file
+
+Workspace-wide (FINDINGS.md):
+  - coverage table section present when verified findings exist (config full_coverage_enforced)
+  - artifact pre-registrations have cleanup evidence
+
+Report-side (REPORT.md, checked when the file exists, i.e. at ship time):
+  - banned words absent (config report.banned_words, word-boundary match)
+  - required sections present: Positive controls, Findings index, lateral movement map
+  - every VERIFIED finding ID from FINDINGS.md appears in the report
+
+Plus: SHA256SUMS.txt covers every evidence/raw file.
 
 Exit code 0 = all gates pass; 1 = violations found (blocks the report).
 
@@ -89,6 +99,46 @@ def check_finding(workspace, fid, section, cfg):
     return {"finding": fid, "raw_files": sum(len(v) for v in ev.values()), "issues": issues}
 
 
+def strip_template_comments(text):
+    """Drop HTML comments: scaffold templates inside them are inert, not evidence."""
+    return re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+
+
+def report_checks(workspace, cfg):
+    """QA checks on REPORT.md. Returns (issues, report_text) or None when no report yet.
+
+    Mid-engagement workspaces have no REPORT.md; those checks run at ship time.
+    """
+    rpath = os.path.join(workspace, "REPORT.md")
+    if not os.path.exists(rpath):
+        return None
+    report = open(rpath, encoding="utf-8", errors="ignore").read()
+    rep = cfg.get("report", {})
+    issues = []
+    for w in rep.get("banned_words", []):
+        hits = re.findall(r"\b" + re.escape(w) + r"\b", report, re.IGNORECASE)
+        if hits:
+            issues.append(f"banned word in REPORT.md: '{w}' x{len(hits)} — hypothesis language, findings ship proof only")
+    if rep.get("positive_controls_section_required", True) and not re.search(r"(?i)positive controls", report):
+        issues.append("REPORT.md missing the Positive controls section (honest negatives raise every severity claim)")
+    if rep.get("lateral_movement_map_required", True) and not re.search(r"(?i)\blateral\b", report):
+        issues.append("REPORT.md missing the lateral movement map")
+    if not re.search(r"(?i)findings index", report):
+        issues.append("REPORT.md missing the Findings index section")
+    return issues, report
+
+
+def workspace_checks(findings_text, cfg):
+    """Workspace-wide FINDINGS.md checks. Text must already be comment-stripped."""
+    issues = []
+    if cfg.get("testing", {}).get("full_coverage_enforced", {}).get("coverage_table_in_findings_required", True):
+        if not re.search(r"(?i)#{2,}\s*coverage table", findings_text):
+            issues.append("no 'Coverage table' section in FINDINGS.md — full coverage is enforced, surfaces must be closed surface-by-surface")
+    if re.search(r"(?i)pre-registrat", findings_text) and not re.search(r"(?i)clean(?:up|ed)", findings_text):
+        issues.append("artifact pre-registrations present but no cleanup evidence in FINDINGS.md")
+    return issues
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("workspace")
@@ -115,6 +165,22 @@ def main():
         if r["issues"]:
             failures += 1
 
+    clean_text = strip_template_comments(text)
+    global_issues = workspace_checks(clean_text, cfg)
+
+    report_issues = []
+    checked_fids = [r["finding"] for r in results]
+    rc = report_checks(a.workspace, cfg)
+    if rc is None:
+        report_note = "no REPORT.md yet; report-side checks run at ship time"
+    else:
+        report_issues, report_text = rc
+        missing = [fid for fid in checked_fids if fid not in report_text]
+        for fid in missing:
+            report_issues.append(f"verified finding {fid} missing from REPORT.md")
+        report_note = None
+    failures += len(global_issues) + len(report_issues)
+
     raw = os.path.join(a.workspace, "evidence", "raw")
     sums_path = os.path.join(raw, "SHA256SUMS.txt")
     uncovered = []
@@ -129,13 +195,28 @@ def main():
         failures += 1
 
     if a.json:
-        print(json.dumps({"results": results, "sha_uncovered": uncovered, "failures": failures}, indent=1))
+        print(json.dumps({"results": results,
+                          "workspace_issues": global_issues,
+                          "report_issues": report_issues,
+                          "report_note": report_note,
+                          "sha_uncovered": uncovered,
+                          "failures": failures}, indent=1))
     else:
         for r in results:
             state = "PASS" if not r["issues"] else "FAIL"
             print(f"[{state}] {r['finding']} (raw files: {r['raw_files']})")
             for i in r["issues"]:
                 print(f"       - {i}")
+        if global_issues:
+            print("[FAIL] workspace")
+            for i in global_issues:
+                print(f"       - {i}")
+        if report_issues:
+            print("[FAIL] REPORT.md")
+            for i in report_issues:
+                print(f"       - {i}")
+        elif report_note:
+            print(f"[ -- ] {report_note}")
         if uncovered:
             print(f"[FAIL] SHA256SUMS.txt does not cover: {', '.join(uncovered[:5])}"
                   + (" ..." if len(uncovered) > 5 else ""))

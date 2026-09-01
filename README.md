@@ -28,10 +28,12 @@ code, not by memory.
 | `config.json` | Engagement policy engine: budget, stop conditions, proof gates, evidence rules, chain requirements — agents treat it as law |
 | `knowledge/workflow.md` | The engagement loop: phases, hypothesis management, plan gate, proof gate, chain matrix, deep-chain checklist, mode selection, QA gate |
 | `knowledge/playbook.md` | Vulnerability classes ranked by real hit-rate, each with proof bars and escalation trees, plus anti-patterns |
-| `knowledge/mobile.md` | APK acquisition-to-proof pipeline: decode, sweep, instrumentation, IPC |
+| `knowledge/mobile.md` | APK acquisition-to-proof pipeline: decode, sweep, instrumentation, IPC, plus the iOS pipeline (acquisition, entitlements, keychain, universal links, Frida) |
 | `knowledge/web.md` | Web estate methodology |
+| `knowledge/js-reverse.md` | Web JS deobfuscation and signing recovery: source maps, webpack chunks, obfuscator.io ladder, anti-debug, custom VMs — feeds playbook classes 5 and 15 |
+| `knowledge/journal.md` | Dated learn-back log; hunt_recall indexes it automatically |
 | `knowledge/reporting.md` | Report structure, severity negotiation, dual framing |
-| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code — a report ships only when it exits 0) |
+| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code: findings, coverage, cleanup, and the report side — banned words, required sections, findings-index cross-check. A report ships only when it exits 0) |
 | `tools/` | Vendored utilities (one folder per concern, pure where possible) |
 | `templates/` | Report and finding templates |
 

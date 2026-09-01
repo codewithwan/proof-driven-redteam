@@ -49,6 +49,7 @@ Case patterns (anonymized, all real):
 - GCP service account private key stored as a 4658-element int array inside Dart source. Proven with a live oauth2 token mint plus secretmanager list. Score 10.0.
 - Partner-hub clientSecret in a Flutter pool: an all:read token unlocked a vault of 12 partner bank and telco credentials plus CRUD, proven with a 201 create followed by delete.
 - AES key + IV + admin password in an Expo app config: minted a channel JWT. Every mutation returned an auth error, so the finding was honestly bounded to read-only High. Boundary proof is proof discipline.
+- SECRET-AGE PROOF VIA VERSION BISECTION (2026-08, static-only engagement): with live testing off the table, acquire 2-3 historical builds from the mirror website (see mobile.md acquisition rules) and diff secret markers across them. Byte-identical secret values across versions = a MEASURED no-rotation window ("public and unrotated since >= 2026-03"), which converts rotation urgency from assumption to evidence; the introduction window (first version carrying the secret) dates the exposure; and a clean OLD build doubles as a positive control — it proves the client's pipeline CAN ship without the secret, killing the "it's unavoidable in Flutter apps" remediation objection before it is raised.
 
 ## 2. BOLA / IDOR on Sequential and Weak Identifiers (hit-rate: 7 of 30)
 

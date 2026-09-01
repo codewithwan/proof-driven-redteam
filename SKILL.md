@@ -65,7 +65,7 @@ Agents treat this file as law: never hardcode overrides, never soften a requirem
 |---|---|---|---|
 | Pick target | own research | `hunt_recall.py <keywords>` | shortlist with rationale |
 | Gather | `knowledge/workflow.md` phase table | `target_init.py <slug> --app x.apk` | workspace + provenance + recon corpus |
-| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` | `apk_recon.py <dir>`, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
+| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` (`knowledge/js-reverse.md` when web params are signed/encrypted) | `apk_recon.py <dir>`, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
 | Plan | `knowledge/workflow.md` PLAN gate | | dynamic test plan in FINDINGS |
 | Confirm | `knowledge/playbook.md` (the 14 classes) | MCP servers | evidence blocks, verdicts |
 | Operate | `knowledge/workflow.md` ladder + QA gate | | capability matrices, lateral map, cleanup evidence |

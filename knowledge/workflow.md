@@ -16,7 +16,7 @@ R Report   only proven findings, hypotheses stay queued
 | Phase | Entry | Core activities | Exit criteria |
 |---|---|---|---|
 | Gather | scope.txt signed | scaffold, acquire app with provenance, subdomain/URL/JS/cloud recon, infra port map, estate screenshots | coverage inputs exist: hosts.txt, endpoints.txt, live-host list, recon notes complete |
-| Analyze | gather outputs | decode, secret sweep, signature extraction, manifest triage, per-stack deep dive, business-flow map from app UI/API | secret leads classified, endpoint inventory, hypothesis queue H-001+ populated, coverage table initialized |
+| Analyze | gather outputs | decode, secret sweep, signature extraction, manifest triage, per-stack deep dive (js-reverse.md when params are signed or encrypted on web targets), business-flow map from app UI/API | secret leads classified, endpoint inventory, hypothesis queue H-001+ populated, coverage table initialized |
 | Plan | hypothesis queue non-empty | dynamic test plan per objective: numbered requests, negative controls, artifact registrations, rollback | plan appended to FINDINGS, every request has a control and an expected result |
 | Confirm | plan written | execute plan requests, capture evidence blocks, update hypotheses, escalate per ladder | every queued hypothesis is PROVEN, DEAD, or BLOCKED (with reason) |
 | Operate | confirmed footholds | capability matrices, scale proofs, recency proofs, lateral replay across the whole estate, write-path chains with prefixed artifacts | ladder exhausted per finding, lateral map complete, cleanup done and evidenced |
@@ -248,8 +248,9 @@ Tools that enforce this mechanically (use them; they are the front doors):
   - `bin/impact_parser.py` — parses captured bodies (JSON or length-prefixed binary, schema
     given as field specs) and emits the measured impact-quantification block.
   - `bin/chain_gate.py` — the QA gate as code: raw evidence present, controls, retests, chain
-    matrix completeness, impact quantification, SHA coverage. A report ships only when it
-    exits 0.
+    matrix completeness, impact quantification, SHA coverage, coverage table closure,
+    cleanup evidence, and the report side (banned words, required sections, every verified
+    finding present in REPORT.md). A report ships only when it exits 0.
 
 Hard rules (enforced by the QA gate):
 - A transcript is written by the capture tool, and contains the request EXACTLY as sent and the
@@ -303,5 +304,5 @@ Targets are engagement-authorized: test fully and deeply, timidity produces the 
 ## After the report ships
 
 1. Track each finding status (accepted, duplicate, need-more-info) in FINDINGS.
-2. Learn-back, the skill compounds: new technique into playbook.md, new tool into mcp-tools.md plus the doctor manifest, reusable code into your own snippets.
+2. Learn-back, the skill compounds: new technique into playbook.md, new tool into mcp-tools.md plus the doctor manifest, reusable code into your own snippets, and every dated technique entry into journal.md (hunt_recall indexes it automatically).
 3. Credentials we exposed are our disclosure responsibility: state it in the email, give a grace period.

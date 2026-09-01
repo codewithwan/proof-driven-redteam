@@ -52,6 +52,10 @@ for cmd, hint, opt in [
     ("hbc-decompiler", "npm i -g hbc-decompiler (Hermes/RN bundles)", True),
     ("frida", "pip install frida-tools (dynamic hooks)", True),
     ("vigolium", "DAST triage, optional", True),
+    ("ideviceinstaller", "brew install libimobiledevice (iOS app pull, jailbroken device)", True),
+    ("class-dump", "ObjC header dumper for iOS binaries (brew install class-dump)", True),
+    ("node", "Node for js-reverse.md deobfuscation sandboxes (Babel/AST work)", True),
+    ("js-beautify", "npm i -g js-beautify (pretty-print, js-reverse.md)", True),
 ]:
     add(cmd, which(cmd), hint, optional=opt)
 
@@ -84,6 +88,7 @@ for mod, hint, opt in [
 
 # --- vendored tools (ship with this skill, always present) ---
 add("tools/apkpure", os.path.isfile(os.path.join(TOOLS_DIR, "apkpure", "apkpure_dl", "cli.py")))
+add("tools/play_store", os.path.isfile(os.path.join(TOOLS_DIR, "play_store", "play_meta.py")))
 add("tools/device_pull", os.path.isfile(os.path.join(TOOLS_DIR, "device_pull", "get_app_from_device.py")))
 add("tools/mcp/cvss", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "cvss", "server.py")))
 add("tools/mcp/tempmail", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "tempmail", "server.py")))

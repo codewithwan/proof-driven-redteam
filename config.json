@@ -240,7 +240,7 @@
       "evidence_capture": "bin/evidence_capture.py — ALL dynamic probes go through it (raw transcripts guaranteed)",
       "differential": "bin/differential.py — deep-chain gate 1 (3-way parameter semantics) via evidence_capture",
       "impact_parser": "bin/impact_parser.py — quantifies impact from captured bodies (record/PII/freshness/scale)",
-      "chain_gate": "bin/chain_gate.py — QA gate enforcer; must exit 0 before any report ships"
+      "chain_gate": "bin/chain_gate.py — QA gate enforcer (findings, coverage, cleanup, report-side banned words and sections); must exit 0 before any report ships"
     },
     "report_ships_only_if": "bin/chain_gate.py <workspace> exits 0"
   }
