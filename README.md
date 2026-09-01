@@ -32,11 +32,9 @@ code, not by memory.
 | `knowledge/web.md` | Web estate methodology |
 | `knowledge/js-reverse.md` | Web JS deobfuscation and signing recovery: source maps, webpack chunks, obfuscator.io ladder, anti-debug, custom VMs — feeds playbook classes 5 and 15 |
 | `knowledge/journal.md` | Dated learn-back log; hunt_recall indexes it automatically |
-| `knowledge/reporting.md` | Report structure, severity negotiation, dual framing |
-| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code: findings, coverage, cleanup, and the report side — banned words, required sections, findings-index cross-check. A report ships only when it exits 0) |
 | `knowledge/vigolium.md` | Vigolium hybrid integration: dual-layer dispatch (operator agent + vigolium agent), leads import, OAST lifecycle, agent LLM setup |
 | `knowledge/reporting.md` | Report structure, severity negotiation, dual framing |
-| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code — a report ships only when it exits 0), `vigolium_leads.py` (vigolium findings into the hypothesis queue as leads, deduped) |
+| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code: findings, coverage, cleanup, and the report side — banned words, required sections, findings-index cross-check. A report ships only when it exits 0), `vigolium_leads.py` (vigolium findings into the hypothesis queue as leads, deduped) |
 | `tools/` | Vendored utilities (one folder per concern, pure where possible) |
 | `templates/` | Report and finding templates |
 

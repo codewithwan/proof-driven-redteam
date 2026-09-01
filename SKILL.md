@@ -65,10 +65,8 @@ Agents treat this file as law: never hardcode overrides, never soften a requirem
 | Phase | Read | Tools | Deliverable |
 |---|---|---|---|
 | Pick target | own research | `hunt_recall.py <keywords>` | shortlist with rationale |
-| Gather | `knowledge/workflow.md` phase table | `target_init.py <slug> --app x.apk` | workspace + provenance + recon corpus |
-| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` (`knowledge/js-reverse.md` when web params are signed/encrypted) | `apk_recon.py <dir>`, jadx MCP, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
 | Gather | `knowledge/workflow.md` phase table | `target_init.py <slug> --app x.apk`, `vigolium scan` (web targets, mandatory) | workspace + provenance + recon corpus, vigolium leads imported |
-| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` | `apk_recon.py <dir>`, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
+| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` (`knowledge/js-reverse.md` when web params are signed/encrypted) | `apk_recon.py <dir>`, jadx MCP, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
 | Plan | `knowledge/workflow.md` PLAN gate | | dynamic test plan in FINDINGS |
 | Confirm | `knowledge/playbook.md` (the 14 classes) | MCP servers | evidence blocks, verdicts |
 | Operate | `knowledge/workflow.md` ladder + QA gate | | capability matrices, lateral map, cleanup evidence |
@@ -84,8 +82,7 @@ python3 bin/hunt_recall.py idor jwt otp      # prior art from the knowledge base
 python3 tools/apkpure/apkpure_dl/cli.py com.example.app   # acquire a target APK with provenance
 ```
 
-MCP servers (cvss, tempmail, shodan, hacktricks, jadx, burp) register from tools/mcp/ into any MCP-capable agent. Registration snippets: knowledge/mcp-tools.md.
-MCP servers (cvss, tempmail, shodan, hacktricks) register from tools/mcp/ into any MCP-capable agent. Registration snippets: knowledge/mcp-tools.md. Web engagements additionally drive vigolium (binary on PATH) as the lead engine: knowledge/vigolium.md.
+MCP servers (cvss, tempmail, shodan, hacktricks, jadx, burp) register from tools/mcp/ into any MCP-capable agent. Registration snippets: knowledge/mcp-tools.md. Web engagements additionally drive vigolium (binary on PATH) as the lead engine: knowledge/vigolium.md.
 
 ## Non-negotiables
 
