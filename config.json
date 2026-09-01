@@ -228,6 +228,15 @@
   "tools": {
     "doctor_before_engagement": true,
     "scanner_output_is_lead_only": true,
+    "vigolium": {
+      "web_run_required": true,
+      "delegation_flags_required": true,
+      "output_is_leads_only": true,
+      "respect_http_pacing": true,
+      "import_tool": "bin/vigolium_leads.py — vigolium finding -j into the hypothesis queue, deduped, never evidence",
+      "minimum_version": "0.4",
+      "note": "binary on PATH, never vendored (AGPL); doctrine in knowledge/vigolium.md"
+    },
     "mcp_servers_expected": [
       "cvss",
       "tempmail",

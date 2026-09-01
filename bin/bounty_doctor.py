@@ -51,9 +51,20 @@ for cmd, hint, opt in [
     ("semgrep", "SAST", True),
     ("hbc-decompiler", "npm i -g hbc-decompiler (Hermes/RN bundles)", True),
     ("frida", "pip install frida-tools (dynamic hooks)", True),
-    ("vigolium", "DAST triage, optional", True),
 ]:
     add(cmd, which(cmd), hint, optional=opt)
+
+# --- vigolium (web lead engine, knowledge/vigolium.md; versioned) ---
+if which("vigolium"):
+    try:
+        out = subprocess.run(["vigolium", "version", "-j"], capture_output=True,
+                             text=True, timeout=15)
+        ver = json.loads(out.stdout).get("version", "").lstrip("v")
+        add("vigolium", True, f"v{ver} web lead engine (see knowledge/vigolium.md)")
+    except (json.JSONDecodeError, ValueError, subprocess.SubprocessError, OSError):
+        add("vigolium", True, "version unreadable; see knowledge/vigolium.md")
+else:
+    add("vigolium", False, "web lead engine: curl -fsSL https://vigolium.com/install.sh | bash", optional=True)
 
 # --- blutter (Flutter Dart AOT dumper): env override, then common paths ---
 blutter = os.environ.get("BLUTTER_HOME") or ""

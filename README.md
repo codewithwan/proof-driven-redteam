@@ -30,8 +30,9 @@ code, not by memory.
 | `knowledge/playbook.md` | Vulnerability classes ranked by real hit-rate, each with proof bars and escalation trees, plus anti-patterns |
 | `knowledge/mobile.md` | APK acquisition-to-proof pipeline: decode, sweep, instrumentation, IPC |
 | `knowledge/web.md` | Web estate methodology |
+| `knowledge/vigolium.md` | Vigolium hybrid integration: dual-layer dispatch (operator agent + vigolium agent), leads import, OAST lifecycle, agent LLM setup |
 | `knowledge/reporting.md` | Report structure, severity negotiation, dual framing |
-| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code — a report ships only when it exits 0) |
+| `bin/` | Scaffolding + recon + **enforcement tooling**: `evidence_capture.py` (the only front door for dynamic probes — raw transcripts guaranteed), `differential.py` (3-way parameter-semantics prober), `impact_parser.py` (impact quantification from captured bodies), `chain_gate.py` (QA gate as code — a report ships only when it exits 0), `vigolium_leads.py` (vigolium findings into the hypothesis queue as leads, deduped) |
 | `tools/` | Vendored utilities (one folder per concern, pure where possible) |
 | `templates/` | Report and finding templates |
 
