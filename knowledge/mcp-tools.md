@@ -20,6 +20,9 @@ Each tool is a self-contained folder. Every MCP server follows the same conventi
 
 Python deps for the vendored tools: requests, androguard, curl_cffi, pycryptodome (all listed by `bin/bounty_doctor.py`).
 
+Vigolium (external binary on PATH, not vendored, AGPL) is the web lead engine: dispatch
+routing, leads import, OAST lifecycle, and agent LLM setup live in `knowledge/vigolium.md`.
+
 ## Registering the MCP servers (any machine, any agent)
 
 Example for an opencode config (`~/.config/opencode/opencode.json`), adapt `<repo>` to your clone path:

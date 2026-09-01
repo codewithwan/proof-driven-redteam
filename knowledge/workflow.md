@@ -15,7 +15,7 @@ R Report   only proven findings, hypotheses stay queued
 
 | Phase | Entry | Core activities | Exit criteria |
 |---|---|---|---|
-| Gather | scope.txt signed | scaffold, acquire app with provenance, subdomain/URL/JS/cloud recon, infra port map, estate screenshots | coverage inputs exist: hosts.txt, endpoints.txt, live-host list, recon notes complete |
+| Gather | scope.txt signed | scaffold, acquire app with provenance, subdomain/URL/JS/cloud recon, infra port map, estate screenshots, vigolium scan of in-scope web hosts (web_run_required, knowledge/vigolium.md) | coverage inputs exist: hosts.txt, endpoints.txt, live-host list, recon notes complete, vigolium run recorded in coverage table |
 | Analyze | gather outputs | decode, secret sweep, signature extraction, manifest triage, per-stack deep dive (js-reverse.md when params are signed or encrypted on web targets), business-flow map from app UI/API | secret leads classified, endpoint inventory, hypothesis queue H-001+ populated, coverage table initialized |
 | Plan | hypothesis queue non-empty | dynamic test plan per objective: numbered requests, negative controls, artifact registrations, rollback | plan appended to FINDINGS, every request has a control and an expected result |
 | Confirm | plan written | execute plan requests, capture evidence blocks, update hypotheses, escalate per ladder | every queued hypothesis is PROVEN, DEAD, or BLOCKED (with reason) |
@@ -251,6 +251,9 @@ Tools that enforce this mechanically (use them; they are the front doors):
     matrix completeness, impact quantification, SHA coverage, coverage table closure,
     cleanup evidence, and the report side (banned words, required sections, every verified
     finding present in REPORT.md). A report ships only when it exits 0.
+  - `bin/vigolium_leads.py` — imports `vigolium finding -j` output into the hypothesis queue
+    as deduped QUEUED leads. Scanner output enters the loop here and nowhere else; vigolium
+    findings never become evidence (doctrine: knowledge/vigolium.md).
 
 Hard rules (enforced by the QA gate):
 - A transcript is written by the capture tool, and contains the request EXACTLY as sent and the
