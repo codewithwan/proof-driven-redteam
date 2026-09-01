@@ -1,0 +1,6 @@
+{
+  "_comment": "Burner Google account for direct Play downloads (first login only). Tokens are saved to play_tokens.json after first use. NEVER commit this file.",
+  "email": "your.burner.account@gmail.com",
+  "password": "app-or-account-password",
+  "device": "px_7a"
+}
