@@ -71,6 +71,9 @@ else:
     add("vigolium", False, "web lead engine: curl -fsSL https://vigolium.com/install.sh | bash", optional=True)
 
 # --- blutter (Flutter Dart AOT dumper): env override, then common paths ---
+ghidra = which("ghidraRun")
+add("ghidra", ghidra, "brew install ghidra (formula; needs JAVA_HOME=openjdk@21 keg, see journal)", optional=True)
+
 blutter = os.environ.get("BLUTTER_HOME") or ""
 if not blutter:
     for cand in ("~/Tools/blutter", "~/tools/blutter", "~/blutter"):

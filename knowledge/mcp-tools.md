@@ -23,6 +23,15 @@ Python deps for the vendored tools: requests, androguard, curl_cffi, pycryptodom
 Vigolium (external binary on PATH, not vendored, AGPL) is the web lead engine: dispatch
 routing, leads import, OAST lifecycle, and agent LLM setup live in `knowledge/vigolium.md`.
 
+Host-level MCP servers (registered in the agent config, not vendored here; they serve
+js-reverse.md and native-lib RE):
+
+| Server | Command | Serves |
+|---|---|---|
+| jshookmcp | `npx -y @jshookmcp/jshook@0.3.4` (env `MCP_TRANSPORT=stdio`) | js-reverse.md: JS hooks, CDP debugging, network monitoring, code analysis. Meta-router server: `search_tools`/`activate_domain` then call. First npx run downloads large deps, cache it before an engagement |
+| ghidra-mcp | `uv run <bridge path>` | native .so/.dylib/ELF RE: decompile, xrefs, rename, imports/exports (25 tools). Plugin (LaurieWired GhidraMCP 1.4) in the Ghidra Extensions dir; plugin HTTP server starts from the Ghidra GUI, bridge talks to 127.0.0.1:8080. Ghidra brew formula needs JAVA_HOME pointed at the keg-only openjdk@21 |
+| semgrep CLI | `brew install semgrep` | SAST leads; run directly via CLI. The semgrep-mcp wrapper hard-fails at startup without a semgrep login (`--pro` check), CLI is sufficient per scanner-is-lead doctrine |
+
 ## Registering the MCP servers (any machine, any agent)
 
 Example for an opencode config (`~/.config/opencode/opencode.json`), adapt `<repo>` to your clone path:
@@ -37,6 +46,9 @@ Example for an opencode config (`~/.config/opencode/opencode.json`), adapt `<rep
     "hacktricks":{ "type": "local", "command": ["python3", "<repo>/tools/mcp/hacktricks/server.py"], "enabled": true },
     "jadx":     { "type": "local", "command": ["python3", "<repo>/tools/mcp/jadx/server.py"], "enabled": true },
     "burp":     { "type": "local", "command": ["python3", "<repo>/tools/mcp/burp/server.py"], "enabled": true },
+    "jshookmcp":{ "type": "local", "command": ["npx", "-y", "@jshookmcp/jshook@0.3.4"], "enabled": true,
+                  "environment": { "MCP_TRANSPORT": "stdio" } },
+    "ghidra":   { "type": "local", "command": ["uv", "run", "--quiet", "<bridge path>"], "enabled": true },
     "cve-mcp":   { "type": "local", "command": ["npx", "-y", "cve-mcp"], "enabled": true }
   }
 }
@@ -77,6 +89,11 @@ Rule: a CVE from version matching is a HYPOTHESIS. Proof is the vulnerable path 
 ### Burp-centric triage
 - Scanner issues (burp get_scanner_issues): LEADS, never findings. Manually confirm before any report line.
 - Proxy history mining (get_proxy_http_history_regex): reconstruct session flow, find auth tokens and untested endpoints from real traffic.
+
+### JS reverse and native RE (js-reverse.md)
+- Web target with signed or encrypted params: jshookmcp is the runtime side of js-reverse.md. search_tools for hook/CDP/network domains, activate, then hook the signer at runtime to capture exact signing inputs when static deobfuscation is ambiguous.
+- Native libs (lib/*.so, .dylib, JNI): ghidra-mcp decompile_function, xrefs, list_imports for the static key-material sweep that strings misses. Rename as you confirm, the project file IS the work product.
+- Both servers only live while their host app runs (Ghidra GUI + plugin server; browser session for jshook). Start the host before calling.
 
 ## Division of labor (memorize)
 
