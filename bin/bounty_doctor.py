@@ -89,13 +89,15 @@ add("tools/mcp/cvss", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "cvss", "ser
 add("tools/mcp/tempmail", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "tempmail", "server.py")))
 add("tools/mcp/shodan", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "shodan", "server.py")))
 add("tools/mcp/hacktricks", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "hacktricks", "server.py")))
+add("tools/mcp/jadx", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "jadx", "server.py")))
+add("tools/mcp/burp", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "burp", "server.py")))
 
 # --- MCP registration (agent config, machine specific, informational only) ---
 cfg = os.path.expanduser("~/.config/opencode/opencode.json")
 if os.path.isfile(cfg):
     try:
         mcp = (json.load(open(cfg)).get("mcp") or {})
-        for m in ("cve-mcp", "cvss", "tempmail", "hacktricks", "shodan"):
+        for m in ("cve-mcp", "cvss", "tempmail", "hacktricks", "shodan", "jadx", "burp"):
             add("mcp:" + m, bool(mcp.get(m, {}).get("enabled")), "register via knowledge/mcp-tools.md", optional=True)
     except Exception:
         pass

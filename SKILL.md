@@ -4,9 +4,10 @@ description: >-
   Proof-driven penetration testing operator skill for professional teams,
   battle-tested on 30+ authorized mobile and web engagements. Self-contained
   and portable: vendored Python tools (APK mirror downloader with provenance,
-  device APK puller, CVSS/tempmail/shodan/hacktricks MCP servers, one folder
-  per tool) and an engagement policy engine (config.json). Covers target
-  scaffolding, APK decode per stack (jadx, apktool, blutter, Hermes), Frida
+  device APK puller, CVSS/tempmail/shodan/hacktricks MCP servers, a jadx
+  CLI MCP server for APK decompilation, and a Burp Suite stdio bridge to
+  Burp's native MCP server, one folder per tool) and an engagement policy
+  engine (config.json). Covers target scaffolding, APK decode per stack (jadx, apktool, blutter, Hermes), Frida
   instrumentation cookbook, signing-cert extraction for key-restriction
   proofs, a 14-class vuln playbook ranked by real hit-rate with proof bars
   and escalation trees, OAuth/JWT/GraphQL/API attack classes, mandatory
@@ -65,7 +66,7 @@ Agents treat this file as law: never hardcode overrides, never soften a requirem
 |---|---|---|---|
 | Pick target | own research | `hunt_recall.py <keywords>` | shortlist with rationale |
 | Gather | `knowledge/workflow.md` phase table | `target_init.py <slug> --app x.apk` | workspace + provenance + recon corpus |
-| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` | `apk_recon.py <dir>`, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
+| Analyze | `knowledge/mobile.md` and/or `knowledge/web.md` | `apk_recon.py <dir>`, jadx MCP, blutter, frida | secret leads classified, endpoint inventory, hypothesis queue, coverage table open |
 | Plan | `knowledge/workflow.md` PLAN gate | | dynamic test plan in FINDINGS |
 | Confirm | `knowledge/playbook.md` (the 14 classes) | MCP servers | evidence blocks, verdicts |
 | Operate | `knowledge/workflow.md` ladder + QA gate | | capability matrices, lateral map, cleanup evidence |
@@ -81,7 +82,7 @@ python3 bin/hunt_recall.py idor jwt otp      # prior art from the knowledge base
 python3 tools/apkpure/apkpure_dl/cli.py com.example.app   # acquire a target APK with provenance
 ```
 
-MCP servers (cvss, tempmail, shodan, hacktricks) register from tools/mcp/ into any MCP-capable agent. Registration snippets: knowledge/mcp-tools.md.
+MCP servers (cvss, tempmail, shodan, hacktricks, jadx, burp) register from tools/mcp/ into any MCP-capable agent. Registration snippets: knowledge/mcp-tools.md.
 
 ## Non-negotiables
 
