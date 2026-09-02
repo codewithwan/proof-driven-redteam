@@ -9,6 +9,7 @@ Each tool is a self-contained folder. Every MCP server follows the same conventi
 | Tool | Path | What it does |
 |---|---|---|
 | APK mirror downloader | `tools/apkpure/` | Acquire target APKs with provenance (versioned + SHA256), bypasses CDN bot walls via TLS impersonation. Run: `python3 tools/apkpure/apkpure_dl/cli.py <package>` |
+| APKPure MCP | `tools/mcp/apkpure/` | Target intelligence as MCP tools (all tested live): `apkpure_detail` (mirror metadata + SHA-256), `apkpure_pull` (download, hash-verified), `play_verify` (live Play Store version/installs/rating, no account), `target_score` (engagement-fit 0-30: freshness + install scale + mirror-vs-Play drift, verdict ACTIVE/ALIVE/STALE) |
 | Play Store metadata | `tools/play_store/` | `play_meta.py <pkg>` - live Play Store version/update date, no account, no mirror lag. The authoritative "newest Play version" check. `play_pull.py` downloads directly from Play but needs a burner Google account (see its README) |
 | Device APK puller | `tools/device_pull/` | ADB split-APK pull with SHA256, when you have a physical device |
 | CVSS MCP | `tools/mcp/cvss/` | cvss31 score/explain/batch, honest severity for reports |
@@ -59,7 +60,9 @@ For Claude Code or Codex, the same servers register with their respective MCP co
 ## When to call what
 
 ### Acquisition and evidence chain
-- Need the target APK (kickoff, version diffing, exact prod build): apkpure_dl. The versioned download + SHA256 answers the report question "how did you obtain the app".
+- Target proposal ritual (operator rule): `target_score <package>` FIRST - one call returns the engagement-fit verdict (ACTIVE/ALIVE/STALE), freshness, install scale, and mirror-vs-Play version drift. No target is recommended without it.
+- Need the target APK (kickoff, version diffing, exact prod build): apkpure_dl, or `apkpure_pull` over MCP. The versioned download + SHA256 answers the report question "how did you obtain the app".
+- Exact version dispute (mirror vs Play): `apkpure_detail` + `play_verify` side by side. "Varies with device" on Play means the mirror versionCode is the concrete anchor; mirror-ahead drift means dev iterates faster than the listing shows.
 - Second account for an A-to-B IDOR proof: tempmail create, register, tempmail wait with from/subject filters.
 - OTP arrival proof: tempmail wait. The received message IS the evidence. Try skipping email verification entirely first, some backends never check it.
 - Raw request/response transcripts through the same engine used by hand: burp send_http1_request / send_http2_request. The returned transcript IS the evidence block, captured from Burp, satisfying the raw-pairs rule without leaving the agent.

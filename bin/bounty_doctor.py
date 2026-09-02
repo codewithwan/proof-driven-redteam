@@ -102,6 +102,7 @@ for mod, hint, opt in [
 
 # --- vendored tools (ship with this skill, always present) ---
 add("tools/apkpure", os.path.isfile(os.path.join(TOOLS_DIR, "apkpure", "apkpure_dl", "cli.py")))
+add("tools/apkpure_mcp", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "apkpure", "server.py")))
 add("tools/play_store", os.path.isfile(os.path.join(TOOLS_DIR, "play_store", "play_meta.py")))
 add("tools/device_pull", os.path.isfile(os.path.join(TOOLS_DIR, "device_pull", "get_app_from_device.py")))
 add("tools/mcp/cvss", os.path.isfile(os.path.join(TOOLS_DIR, "mcp", "cvss", "server.py")))
