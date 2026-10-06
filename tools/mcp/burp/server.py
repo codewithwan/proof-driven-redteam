@@ -45,6 +45,13 @@ from urllib.parse import urljoin
 DEFAULT_URL = "http://127.0.0.1:9876"
 BURP_URL = os.environ.get("BURP_MCP_URL", DEFAULT_URL).rstrip("/")
 
+# Localhost bridge: never route through any proxy. Python urllib on macOS
+# silently picks up the system-wide proxy (scutil) and would otherwise send
+# 127.0.0.1 traffic to the egress proxy chain, which answers 502.
+urllib.request.install_opener(
+    urllib.request.build_opener(urllib.request.ProxyHandler({}))
+)
+
 endpoint_holder: dict[str, str] = {}
 endpoint_ready = threading.Event()
 
