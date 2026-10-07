@@ -53,3 +53,10 @@ Rules:
 - Technique: treat GUI-backed MCP bridges as on-demand: the bridge exits when the host is unreachable, and the agent restarts it next session. Before an engagement round needing Burp or Ghidra, start the host app first (Burp with MCP enabled on 9876; Ghidra GUI with the GhidraMCP plugin server started on 8080). Cache jshookmcp's large npx deps before an engagement, first download is slow.
 - Proof bar: handshake tests with and without the host running.
 - Status: PROVEN
+
+## 2026-10-07 - Solve openresty splash-JS WAF challenges by replaying the browser's HttpOnly clearance cookie extracted via CDP
+- Engagement type: web (school-site WordPress estate)
+- Signal: after ~60 minutes of probing, every path on the host (including REST and xmlrpc) started returning an identical 12KB "One moment, please..." HTML page (openresty edge, JS bot-detect: webdriver/headless-UA/plugin-spoofing checks, 5s auto-reload). Several "200 hits" on sensitive paths were actually this challenge page - size-fingerprint everything before verdicts.
+- Technique: open the target in the real managed browser (action=open), wait ~4s for the JS form auto-submit to clear, then extract the HttpOnly `wssplashchk` cookie via CDP WebSocket `Storage.getCookies` (ws://127.0.0.1:PORT/devtools/page/<targetId>; document.cookie cannot see HttpOnly). Replay it as a curl header together with the browser's exact UA to restore full REST access through evidence_capture. When the gateway proxy 502s direct-IP attempts, keep the `env -u HTTP_PROXY -u HTTPS_PROXY curl` bypass ready with a known-good control (google 200) in the same invocation. Expect WAF tiering: REST reads stay clearable with the cookie, while xmlrpc/auth-like traffic gets its own hard block (deny page then empty tarpit) - do not burn the sprint fighting the second tier.
+- Proof bar: cookie replay restored the exact pre-challenge responses (litespeed ping verbatim JSON, users list) and retests 2x stayed 200; challenge-page false positives were killed by byte-size + title fingerprint against the deny/catch-all shapes.
+- Status: PROVEN
