@@ -30,6 +30,20 @@ from datetime import datetime, timezone
 
 CTX = ssl.create_default_context()
 
+SENSITIVE_REQ_HEADERS = {"cookie", "authorization", "proxy-authorization", "x-xsrf-token", "x-csrf-token"}
+
+def redact_header(k, v):
+    """Redact credential-bearing header values at render time (tool-generated,
+    so transcripts stay commit-safe). Cookie/Authorization values and all
+    Set-Cookie values are replaced with a length-preserving placeholder."""
+    kl = k.lower()
+    if kl in SENSITIVE_REQ_HEADERS:
+        return f"{k}: [REDACTED by capture tool len={len(v)}]"
+    if kl == "set-cookie":
+        name = v.split("=", 1)[0]
+        return f"{k}: {name}=[REDACTED by capture tool len={len(v)}]"
+    return f"{k}: {v}"
+
 
 def parse_header(s):
     if ":" not in s:
@@ -61,12 +75,14 @@ def render_transcript(tag, note, ts_req, method, scheme, host, path, headers, bo
         f"{method} {scheme}://{host}{path} HTTP/1.1",
         f"Host: {host}",
     ]
-    lines += [f"{k}: {v}" for k, v in headers.items()]
+    lines += [redact_header(k, v) for k, v in headers.items()]
+    if any(k.lower() in SENSITIVE_REQ_HEADERS for k in headers):
+        lines += ["[note: credential-bearing request headers redacted at render time]"]
     if body_bytes:
         lines += ["", "[request body] " + body_bytes.decode("utf-8", "replace")]
     lines += ["", f"=== RESPONSE (exactly as received, {ts_resp}) ===",
               f"HTTP/1.1 {status} {reason}"]
-    lines += [f"{k}: {v}" for k, v in resp_headers]
+    lines += [redact_header(k, v) for k, v in resp_headers]
     lines += [""]
     is_binary = any(b > 0x7e or (b < 0x20 and b not in (0x09, 0x0a, 0x0d)) for b in resp_body[:512])
     if is_binary and resp_body:
